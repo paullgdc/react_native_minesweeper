@@ -1,77 +1,115 @@
+import update from "immutability-helper";
+
 import { range, shuffle } from "../../utils";
 import { TileModel, TileKind, VisibilityKind } from "../../components/Tile";
 
-const placeBombs = (width: number, height: number, bombNumber: number, excluded: Pos): Set<string> => {
+export default interface MineSweeperState {
+    playState: "playing" | "lost" |"won";
+    grid: TileModel[][];
+    bombNumber: number;
+    bombs?: Set<string>;
+    width: number;
+    height: number;
+}
+
+export interface Pos {
+    x: number;
+    y: number;
+}
+
+export const placeBombs = (
+    s: MineSweeperState, excluded: Pos
+): MineSweeperState => {
     const tiles = []
-    for (const x of range(0, width)) {
-        for (const y of range(0, height)) {
-            if(x !== excluded.x && y !== excluded.y) {
+    for (const x of range(0, s.width)) {
+        for (const y of range(0, s.height)) {
+            if (x !== excluded.x || y !== excluded.y) {
                 tiles.push({ x, y })
             }
         }
     }
     shuffle(tiles);
-    return new Set(tiles.slice(0, bombNumber).map(p => JSON.stringify(p)));
-}
-
-interface Pos {
-    x: number;
-    y: number;
-}
-
-export interface MineSweeperGrid {
-    grid: TileModel[][];
-    bombPositions: Set<string>;
-    width: number;
-    height: number;
-}
-
-export class MineSweeperGridOp {
-    static init(width: number, height: number, bombNumber: number, excluded: Pos) {
-        const newGrid: MineSweeperGrid = {
-            bombPositions: placeBombs(width, height, bombNumber, excluded),
-            width,
-            height,
-            grid: [],
-        };
-        newGrid.bombPositions = placeBombs(width, height, bombNumber, excluded);
-        newGrid.width = width;
-        newGrid.height = height;
-        newGrid.grid = [];
-        for (const x of range(0, width)) {
-            newGrid.grid.push([]);
-            for (const y of range(0, height)) {
-                newGrid.grid[x].push(newGrid.bombPositions.has(JSON.stringify({ x, y })) ? {
-                    kind: TileKind.Bomb,
+    const bombs = new Set(tiles.slice(0, s.bombNumber).map(p => JSON.stringify(p)));
+    console.log("new bombs", bombs, tiles);
+    const newGrid: TileModel[][] = [];
+    for (const x of range(0, s.width)) {
+        newGrid.push([]);
+        for (const y of range(0, s.height)) {
+            newGrid[x].push(bombs.has(JSON.stringify({ x, y })) ? {
+                kind: TileKind.Bomb,
+                visibility: VisibilityKind.Hidden,
+            } : {
+                    kind: TileKind.Void,
+                    neighboringBombNb: 0,
                     visibility: VisibilityKind.Hidden,
-                } : {
-                        kind: TileKind.Void,
-                        neighboringBombNb: 0,
-                        visibility: VisibilityKind.Hidden,
                 })
-            }
         }
-        for (const bomb of newGrid.bombPositions) {
-            for(const neighPos of this.tileNeighbors(newGrid, JSON.parse(bomb))) {
-                const neighbor = newGrid.grid[neighPos.x][neighPos.y];
-                if(neighbor.kind === TileKind.Void) {
-                    neighbor.neighboringBombNb += 1;
-                }
-            }
-        }
-        return newGrid;
     }
+    for (const bomb of bombs) {
+        for (const neighPos of tileNeighbors(s, JSON.parse(bomb))) {
+            const neighbor = newGrid[neighPos.x][neighPos.y];
+            if (neighbor.kind === TileKind.Void) {
+                neighbor.neighboringBombNb += 1;
+            }
+        }
+    }
+    return { ...s, bombs, grid: newGrid }
+}
 
-    static * tileNeighbors(g: MineSweeperGrid, {x, y}: Pos) {
-        for (const i of range(x - 1, x + 2)) {
-            for (const j of range(y - 1, y + 2)) {
-                if ((i !== x || j !== y) &&
-                    (0 <= i && i < g.width) &&
-                    (0 <= j && j < g.height)
-                ) {
-                    yield { x: i, y: j }
-                }
+export const init = (width: number, height: number, bombNumber: number) => {
+    const state: MineSweeperState = {
+        playState: "playing",
+        width,
+        height,
+        bombNumber,
+        grid: [],
+    };
+    state.width = width;
+    state.height = height;
+    state.grid = [];
+    for (const x of range(0, width)) {
+        state.grid.push([]);
+        for (const _ of range(0, height)) {
+            state.grid[x].push({
+                kind: TileKind.Void,
+                neighboringBombNb: 0,
+                visibility: VisibilityKind.Hidden,
+            })
+        }
+    }
+    return state;
+}
+
+export function* tileNeighbors(s: MineSweeperState, { x, y }: Pos) {
+    for (const i of range(x - 1, x + 2)) {
+        for (const j of range(y - 1, y + 2)) {
+            if ((i !== x || j !== y) &&
+                (0 <= i && i < s.width) &&
+                (0 <= j && j < s.height)
+            ) {
+                yield { x: i, y: j }
             }
         }
     }
+}
+
+export const revealTile = (s: MineSweeperState, { x, y }: Pos): MineSweeperState => {
+    if (s.grid[x][y].kind === TileKind.Void) {
+        return update(s, { grid: { [x]: { [y]: { visibility: { $set: VisibilityKind.Revealed } } } } });
+    }
+    return update(s, {
+        playState: {$set: "lost"},
+        grid: (g: TileModel[][]) => g.map(
+            c => c.map(
+                t => ({...t, visibility: VisibilityKind.Revealed})
+            )
+        )
+    });
+}
+
+export const flagTile = (s: MineSweeperState, { x, y }: Pos): MineSweeperState => {
+    if (s.grid[x][y].kind === TileKind.Void) {
+        return update(s, { grid: { [x]: { [y]: { visibility: { $set: VisibilityKind.Flagged } } } } });
+    }
+    return s
 }

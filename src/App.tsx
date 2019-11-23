@@ -11,7 +11,7 @@ const App = () => {
     <>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{backgroundColor: "brown", flex: 1}}>
-          <MineSweeper height={4} width={4} bombs={1}/>
+          <MineSweeper height={2} width={2} bombs={2}/>
       </SafeAreaView>
     </>
   );

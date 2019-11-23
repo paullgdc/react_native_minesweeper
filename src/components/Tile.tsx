@@ -32,7 +32,7 @@ const Tile: React.FC<TileProps> = props => <TouchableOpacity
     onLongPress={props.onLongPress}
     style={[
         styles.fixedRatio,
-        props.model.visibility === VisibilityKind.Flagged ?
+        props.model.visibility === VisibilityKind.Revealed ?
             styles.revealed :
             styles.hidden
     ]}
