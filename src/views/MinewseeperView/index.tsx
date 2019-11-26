@@ -5,6 +5,7 @@ import { Visibility } from '../../components/Tile';
 import CustomModal from '../../components/CustomModal';
 import MinesweeperGrid from '../../components/MinesweeperGrid';
 import LabelledCounter from '../../components/LabelledCounter';
+import HorizontalDivider from '../../components/HorizontalDivider';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -68,6 +69,7 @@ const MineSweeper: React.FC<MineSweeperProps> = props => {
     </CustomModal>
     <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
       <LabelledCounter label="Bombs" value={state.bombNumber.toString()} />
+      <HorizontalDivider />
       <LabelledCounter label="Flags" value={state.flagNumber.toString()} />
     </View>
     <ScrollView style={{ width: 0.8 * SCREEN_WIDTH }}>
