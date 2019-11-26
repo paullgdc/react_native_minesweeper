@@ -1,15 +1,17 @@
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 
+import Colors from "../colors";
+
 export enum TileKind {
     Bomb,
     Void,
 }
 
-export enum VisibilityKind {
-    Revealed,
-    Hidden,
-    Flagged,
+export enum Visibility {
+    Revealed = "revealed",
+    Hidden = "hidden",
+    Flagged = "flagged",
 }
 
 export type TileModel = ({
@@ -18,7 +20,7 @@ export type TileModel = ({
     kind: TileKind.Void;
     neighboringBombNb: number;
 }) & {
-    visibility: VisibilityKind
+    visibility: Visibility
 }
 
 export interface TileProps {
@@ -32,24 +34,29 @@ const Tile: React.FC<TileProps> = props => <TouchableOpacity
     onLongPress={props.onLongPress}
     style={[
         styles.fixedRatio,
-        props.model.visibility === VisibilityKind.Revealed ?
-            styles.revealed :
-            styles.hidden
+        styles[props.model.visibility]
     ]}
 >  
-    <Text>{props.model.kind ? props.model.neighboringBombNb : "bomb"}</Text>
+    <Text>{props.model.visibility === Visibility.Revealed ? 
+        props.model.kind ? props.model.neighboringBombNb : "bomb" :
+        ""}</Text>
 </TouchableOpacity>;
 
 const styles = StyleSheet.create({
     fixedRatio: {
         flex: 1,
-        aspectRatio: 1
+        aspectRatio: 1,
+        borderColor: "white",
+        borderWidth: StyleSheet.hairlineWidth,
     },
-    hidden: {
-        backgroundColor: "blue",
+    [Visibility.Hidden]: {
+        backgroundColor: Colors.DarkBlue,
     },
-    revealed: {
-        backgroundColor: "grey",
+    [Visibility.Revealed]: {
+        backgroundColor: Colors.PictonBlue,
+    },
+    [Visibility.Flagged]: {
+        backgroundColor: "red",
     }
 });
 

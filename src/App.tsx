@@ -4,14 +4,16 @@ import {
   StatusBar,
 } from 'react-native';
 
-import MineSweeper from './views/Minewseeper';
+import MineSweeper from './views/MinewseeperView';
+import Colors from "./colors";
+
 
 const App = () => {
   return (
     <>
       <StatusBar barStyle="dark-content" />
-      <SafeAreaView style={{backgroundColor: "brown", flex: 1}}>
-          <MineSweeper height={2} width={2} bombs={2}/>
+      <SafeAreaView style={{backgroundColor: Colors.LightGreen, flex: 1, alignItems: "center"}}>
+          <MineSweeper height={7} width={5} bombs={7}/>
       </SafeAreaView>
     </>
   );
