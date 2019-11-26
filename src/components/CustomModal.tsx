@@ -5,6 +5,7 @@ const windowDims = Dimensions.get("window");
 
 interface CustomModalProps {
     visible: boolean;
+    onClose: () => void;
 }
 
 const pulse = (value: Animated.Value, config: {
@@ -36,7 +37,10 @@ const CustomModal: React.FC<CustomModalProps> = props => {
             Animated.timing(bottom, {
                 toValue: - windowDims.height,
                 duration: 1000,
-            }).start(() => setZIndex(-1));
+            }).start(() => {
+                setZIndex(-1);
+                props.onClose();
+            });
         }
     }, [props.visible]);
     useEffect(() => {
