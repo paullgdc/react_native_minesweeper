@@ -1,16 +1,21 @@
 import update from "immutability-helper";
 
 import { range, shuffle } from "../../utils";
-import { TileModel, TileKind, VisibilityKind } from "../../components/Tile";
+import { TileModel, TileKind, Visibility } from "../../components/Tile";
+
+
+export type Grid = TileModel[][];
 
 export default interface MineSweeperState {
-    playState: "playing" | "lost" |"won";
-    grid: TileModel[][];
+    playState: "playing" | "lost" | "won";
+    grid: Grid;
     bombNumber: number;
+    tilesLeft: number;
     bombs?: Set<string>;
     width: number;
     height: number;
 }
+
 
 export interface Pos {
     x: number;
@@ -30,18 +35,18 @@ export const placeBombs = (
     }
     shuffle(tiles);
     const bombs = new Set(tiles.slice(0, s.bombNumber).map(p => JSON.stringify(p)));
-    console.log("new bombs", bombs, tiles);
-    const newGrid: TileModel[][] = [];
+
+    const newGrid: Grid = [];
     for (const x of range(0, s.width)) {
         newGrid.push([]);
         for (const y of range(0, s.height)) {
             newGrid[x].push(bombs.has(JSON.stringify({ x, y })) ? {
                 kind: TileKind.Bomb,
-                visibility: VisibilityKind.Hidden,
+                visibility: Visibility.Hidden,
             } : {
                     kind: TileKind.Void,
                     neighboringBombNb: 0,
-                    visibility: VisibilityKind.Hidden,
+                    visibility: Visibility.Hidden,
                 })
         }
     }
@@ -59,6 +64,7 @@ export const placeBombs = (
 export const init = (width: number, height: number, bombNumber: number) => {
     const state: MineSweeperState = {
         playState: "playing",
+        tilesLeft: width * height - bombNumber,
         width,
         height,
         bombNumber,
@@ -73,7 +79,7 @@ export const init = (width: number, height: number, bombNumber: number) => {
             state.grid[x].push({
                 kind: TileKind.Void,
                 neighboringBombNb: 0,
-                visibility: VisibilityKind.Hidden,
+                visibility: Visibility.Hidden,
             })
         }
     }
@@ -95,21 +101,34 @@ export function* tileNeighbors(s: MineSweeperState, { x, y }: Pos) {
 
 export const revealTile = (s: MineSweeperState, { x, y }: Pos): MineSweeperState => {
     if (s.grid[x][y].kind === TileKind.Void) {
-        return update(s, { grid: { [x]: { [y]: { visibility: { $set: VisibilityKind.Revealed } } } } });
+        return update(s, {
+            tilesLeft: left => left - 1,
+            grid: { [x]: { [y]: { visibility: { $set: Visibility.Revealed } } } }
+        });
     }
     return update(s, {
-        playState: {$set: "lost"},
+        playState: { $set: "lost" },
         grid: (g: TileModel[][]) => g.map(
             c => c.map(
-                t => ({...t, visibility: VisibilityKind.Revealed})
+                t => ({ ...t, visibility: Visibility.Revealed })
             )
         )
     });
 }
 
-export const flagTile = (s: MineSweeperState, { x, y }: Pos): MineSweeperState => {
-    if (s.grid[x][y].kind === TileKind.Void) {
-        return update(s, { grid: { [x]: { [y]: { visibility: { $set: VisibilityKind.Flagged } } } } });
+export const toogleFlagged = (s: MineSweeperState, { x, y }: Pos): MineSweeperState => {
+    if (s.grid[x][y].visibility !== Visibility.Revealed) {
+        const n = update(s, {
+            grid: {
+                [x]: {
+                    [y]: {
+                        visibility: (v) => (v === Visibility.Flagged ? Visibility.Hidden : Visibility.Flagged)
+                    }
+                }
+            }
+        });
+        console.log("new value", n.grid[x][y].visibility)
+        return n
     }
     return s
 }
