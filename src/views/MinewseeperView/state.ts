@@ -1,7 +1,7 @@
 import update from "immutability-helper";
 
 import { range, shuffle } from "../../utils";
-import { TileModel, TileKind, Visibility } from "../../components/Tile";
+import { TileModel, TileKind, Visibility, Pos, VoidTile } from "../../components/Tile";
 import { Grid } from "../../components/MinesweeperGrid";
 
 
@@ -14,12 +14,6 @@ export default interface MineSweeperState {
     bombs?: Set<string>;
     width: number;
     height: number;
-}
-
-
-export interface Pos {
-    x: number;
-    y: number;
 }
 
 export const placeBombs = (
@@ -43,16 +37,18 @@ export const placeBombs = (
             newGrid[x].push(bombs.has(JSON.stringify({ x, y })) ? {
                 kind: TileKind.Bomb,
                 visibility: Visibility.Hidden,
+                pos: { x, y },
             } : {
                     kind: TileKind.Void,
                     neighboringBombNb: 0,
                     visibility: Visibility.Hidden,
+                    pos: { x, y },
                 })
         }
     }
     for (const bomb of bombs) {
-        for (const neighPos of tileNeighbors(s, JSON.parse(bomb))) {
-            const neighbor = newGrid[neighPos.x][neighPos.y];
+        for (const oldNeigh of tileNeighbors(s, JSON.parse(bomb))) {
+            const neighbor = newGrid[oldNeigh.pos.x][oldNeigh.pos.y];
             if (neighbor.kind === TileKind.Void) {
                 neighbor.neighboringBombNb += 1;
             }
@@ -76,11 +72,12 @@ export const init = (width: number, height: number, bombNumber: number) => {
     state.grid = [];
     for (const x of range(0, width)) {
         state.grid.push([]);
-        for (const _ of range(0, height)) {
+        for (const y of range(0, height)) {
             state.grid[x].push({
                 kind: TileKind.Void,
                 neighboringBombNb: 0,
                 visibility: Visibility.Hidden,
+                pos: { x, y },
             })
         }
     }
@@ -94,14 +91,15 @@ export function* tileNeighbors(s: MineSweeperState, { x, y }: Pos) {
                 (0 <= i && i < s.width) &&
                 (0 <= j && j < s.height)
             ) {
-                yield { x: i, y: j }
+                yield s.grid[i][j];
             }
         }
     }
 }
 
 export const revealTile = (s: MineSweeperState, { x, y }: Pos): MineSweeperState => {
-    if (s.grid[x][y].kind === TileKind.Bomb) {
+    const tile = s.grid[x][y];
+    if (tile.kind === TileKind.Bomb) {
         return update(s, {
             playState: { $set: "lost" },
             grid: (g: TileModel[][]) => g.map(
@@ -111,17 +109,23 @@ export const revealTile = (s: MineSweeperState, { x, y }: Pos): MineSweeperState
             )
         });
     }
+    const revealedTiles = openTileWhileNoBombNeighbor(s, tile);
+    console.log(revealedTiles);
+    const updates = {} as any;
+    for(const tile of revealedTiles) {
+        if(!updates[tile.pos.x]) updates[tile.pos.x] = {};
+        updates[tile.pos.x][tile.pos.y] = { visibility: { $set: Visibility.Revealed } };
+    }
     let n = update(s, {
-        tilesLeft: left => left - 1,
-        grid: { [x]: { [y]: { visibility: { $set: Visibility.Revealed } } } },
+        tilesLeft: left => left - revealedTiles.size,
+        grid: updates,
     });
-    if(n.tilesLeft === 0) {
+    if (n.tilesLeft === 0) {
         n = update(n, {
-            playState: {$set: "won"},
+            playState: { $set: "won" },
         });
     }
     return n;
-
 }
 
 export const toogleFlagged = (s: MineSweeperState, { x, y }: Pos): MineSweeperState => {
@@ -140,4 +144,28 @@ export const toogleFlagged = (s: MineSweeperState, { x, y }: Pos): MineSweeperSt
         return n
     }
     return s
+}
+
+const openTileWhileNoBombNeighbor = (s: MineSweeperState, start: VoidTile & {
+    visibility: Visibility;
+    pos: Pos;
+}) => {
+    const openedTileStack = [];
+    const openedTileSet= new Set<TileModel>([start]);
+    if(start.neighboringBombNb === 0) openedTileStack.push(start);
+    let nextTile = openedTileStack.pop();
+    while (nextTile) {
+        for (const neighbor of tileNeighbors(s, nextTile.pos)) {
+            if(neighbor.visibility === Visibility.Revealed || openedTileSet.has(neighbor)) continue;
+            console.log("adding", neighbor);
+            openedTileSet.add(neighbor);
+            if((neighbor as any).neighboringBombNb !== 0) continue;
+            openedTileStack.push(neighbor as VoidTile & {
+                visibility: Visibility;
+                pos: Pos;
+            });
+        }
+        nextTile = openedTileStack.pop();
+    }
+    return openedTileSet;
 }

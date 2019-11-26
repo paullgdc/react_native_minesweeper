@@ -14,13 +14,23 @@ export enum Visibility {
     Flagged = "flagged",
 }
 
-export type TileModel = ({
+export interface Pos {
+    x: number;
+    y: number;
+}
+
+export interface BombTile {
     kind: TileKind.Bomb;
-} | {
+}
+
+export interface VoidTile {
     kind: TileKind.Void;
     neighboringBombNb: number;
-}) & {
-    visibility: Visibility
+}
+
+export type TileModel = ( BombTile | VoidTile ) & {
+    visibility: Visibility,
+    pos: Pos,
 }
 
 export interface TileProps {
