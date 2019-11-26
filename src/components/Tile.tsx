@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
-
+import Icon from 'react-native-vector-icons/FontAwesome';
 import Colors from "../colors";
 
 export enum TileKind {
@@ -29,18 +29,22 @@ export interface TileProps {
     onLongPress?: () => void;
 }
 
-const Tile: React.FC<TileProps> = props => <TouchableOpacity
-    onPress={props.onPress}
-    onLongPress={props.onLongPress}
-    style={[
-        styles.fixedRatio,
-        styles[props.model.visibility]
-    ]}
->  
-    <Text>{props.model.visibility === Visibility.Revealed ? 
-        props.model.kind ? props.model.neighboringBombNb : "bomb" :
-        ""}</Text>
-</TouchableOpacity>;
+const Tile: React.FC<TileProps> = props => (
+    <TouchableOpacity
+        onPress={props.onPress}
+        onLongPress={props.onLongPress}
+        style={[
+            styles.fixedRatio,
+            styles[props.model.visibility]
+        ]}
+    >
+        {props.model.visibility === Visibility.Revealed ?
+            (props.model.kind ? <Text>{props.model.neighboringBombNb}</Text> :
+                <Icon name="bomb" color="red" size={15}/>) :
+            undefined
+        }
+    </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
     fixedRatio: {
@@ -48,6 +52,8 @@ const styles = StyleSheet.create({
         aspectRatio: 1,
         borderColor: "white",
         borderWidth: StyleSheet.hairlineWidth,
+        justifyContent: "center",
+        alignItems: "center",
     },
     [Visibility.Hidden]: {
         backgroundColor: Colors.DarkBlue,
