@@ -49,24 +49,11 @@ const MineSweeper: React.FC<MineSweeperProps> = props => {
     <CustomModal visible={visible}>
       <Button title="close modal" onPress={() => setVisible(false)}/>
     </CustomModal>
-    <ScrollView style={{flex: 1}}>
-      <View style={{width: 0.8 * Dimensions.get('window').width}}>
-        <View style={{ flexDirection: "row", aspectRatio: props.width / props.height }}>
-          {state.grid.map((colum, i) => (
-            <View key={i} style={{ flex: 1, flexDirection: "column", }}>
-              {colum.map((tile, j) => (
-                <Tile
-                  key={j}
-                  model={tile}
-                  onPress={handlePress(i, j)}
-                  onLongPress={handleLongPress(i, j)}
-                />
-              ))}
-            </View>
-          ))}
-        </View>
-        <Text>{state.playState}</Text>
-      </View>
+    <ScrollView style={{ width: 0.8 * SCREEN_WIDTH }}>
+      <MinesweeperGrid
+        grid={state.grid} height={state.height} width={state.width}
+        handlePress={handlePress} handleLongPress={handleLongPress}
+      />
     </ScrollView>
   </>
 };
