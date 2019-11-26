@@ -4,8 +4,9 @@ import {
   StatusBar,
 } from 'react-native';
 
-import MineSweeper from './views/MinewseeperView';
+import MineSweeperView from './views/MinewseeperView';
 import Colors from "./colors";
+import Header from './components/Header';
 
 
 const App = () => {
@@ -13,7 +14,8 @@ const App = () => {
     <>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{backgroundColor: Colors.LightGreen, flex: 1, alignItems: "center"}}>
-          <MineSweeper height={7} width={5} bombs={7}/>
+          <Header title="Minewseeper" />
+          <MineSweeperView height={5} width={5} bombs={7}/>
       </SafeAreaView>
     </>
   );
