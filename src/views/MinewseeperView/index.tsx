@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Text, ScrollView, Dimensions, Button, StyleSheet, View } from 'react-native';
 import MineSweeperState, * as op from "./state";
-import { Visibility } from '../../components/Tile';
 import Modal from '../../components/Modal';
 import MinesweeperGrid from '../../components/MinesweeperGrid';
 import LabelledCounter from '../../components/LabelledCounter';
 import HorizontalDivider from '../../components/HorizontalDivider';
 import EndGamePopup from '../../components/EndGamePopup';
+import LevelSelector from '../../components/LevelSelector';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -17,10 +17,14 @@ interface MineSweeperProps {
 }
 
 const MineSweeper: React.FC<MineSweeperProps> = props => {
+  // const [width, setWidth] = useState(props.height);
+  // const [height, setHeight] = useState(props.height);
+  // const [bombs, setBombs] = useState(props.bombs);
+  const [visible, setVisible] = useState(false);
+
   const [state, setState] = useState<MineSweeperState>(
     op.init(props.width, props.height, props.bombs)
   )
-  const [visible, setVisible] = useState(false);
 
   const handlePress = (x: number, y: number) => () => {
     setState(s => op.revealTile(s, { x, y }));
@@ -70,6 +74,9 @@ const MineSweeper: React.FC<MineSweeperProps> = props => {
         handlePress={handlePress} handleLongPress={handleLongPress}
       />
     </ScrollView>
+    <LevelSelector onSelect={(w, h, b) => {
+      setState(op.init(w, h, b))
+    }} default={{width: state.width, height: state.height, bombs: state.bombNumber}}/>
   </>
 };
 

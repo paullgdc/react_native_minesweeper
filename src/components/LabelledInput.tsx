@@ -1,19 +1,21 @@
 import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import Colors from "../colors";
+import NumericalInput from "./NumericInput";
 
-export interface LabelledCounterProps {
+export interface LabelledInputProps {
     label: string;
-    value: string;
+    value: number;
+    onValueChange: (value: number) => void;
 }
 
-const LabelledCounter: React.FC<LabelledCounterProps> = props => (
+const LabelledInput: React.FC<LabelledInputProps> = props => (
     <View style={styles.container}>
         <View style={styles.label}>
             <Text style={styles.text}>{props.label}</Text>
         </View>
         <View style={styles.input}>
-            <Text>{props.value}</Text>
+            <NumericalInput numValue={props.value} onNumValueChange={props.onValueChange}/>
         </View>
     </View>
 );
@@ -23,7 +25,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.LightGray,
         borderRadius: 3,
         flexDirection: "row",
-        flex: 0,
         marginBottom: 2,
     },
     text: {
@@ -34,10 +35,11 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
     },
     input: {
+        flex: 1,
         paddingHorizontal: 5,
         paddingVertical: 2,
         backgroundColor: "white",
     }
 });
 
-export default LabelledCounter;
+export default LabelledInput;

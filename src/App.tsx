@@ -15,7 +15,7 @@ const App = () => {
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{backgroundColor: Colors.LightGreen, flex: 1, alignItems: "center"}}>
           <Header title="Minewseeper" />
-          <MineSweeperView height={5} width={5} bombs={7}/>
+          <MineSweeperView height={5} width={5} bombs={4}/>
       </SafeAreaView>
     </>
   );
