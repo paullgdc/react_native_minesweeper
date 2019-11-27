@@ -1,17 +1,23 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, TouchableOpacity, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Colors from "../colors";
 
+/**
+ * Represents the type of the tile
+ */
 export enum TileKind {
     Bomb,
     Void,
 }
 
+/**
+ * Represents the fact that the tile is visible or hidden
+ */
 export enum Visibility {
-    Revealed = "revealed",
-    Hidden = "hidden",
-    Flagged = "flagged",
+    Revealed,
+    Hidden,
+    Flagged,
 }
 
 export interface Pos {
@@ -28,7 +34,7 @@ export interface VoidTile {
     neighboringBombNb: number;
 }
 
-export type TileModel = ( BombTile | VoidTile ) & {
+export type TileModel = (BombTile | VoidTile) & {
     visibility: Visibility,
     pos: Pos,
 }
@@ -50,7 +56,7 @@ const Tile: React.FC<TileProps> = props => (
     >
         {props.model.visibility === Visibility.Revealed ?
             (props.model.kind ? <Text>{props.model.neighboringBombNb}</Text> :
-                <Icon name="bomb" color="red" size={15}/>) :
+                <Icon name="bomb" color="red" size={15} />) :
             undefined
         }
     </TouchableOpacity>
@@ -72,7 +78,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.PictonBlue,
     },
     [Visibility.Flagged]: {
-        backgroundColor: "red",
+        backgroundColor: Colors.Red,
     }
 });
 

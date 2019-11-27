@@ -1,5 +1,10 @@
-
-export function* range(start=0, end=Infinity, step = 1): IterableIterator<number> {
+/**
+ * copies python range() function
+ * @param start start of the range. included
+ * @param end end of the range. excluded
+ * @param step
+ */
+export function* range(start = 0, end = Infinity, step = 1): IterableIterator<number> {
     for (let i = start; i < end; i += step) {
         yield i;
     }

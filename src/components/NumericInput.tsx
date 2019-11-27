@@ -6,6 +6,10 @@ export interface NumericalInputProps extends TextInputProps {
     onNumValueChange: (num: number) => void;
 };
 
+/**
+ * A TextInput which only allows numbers to be written and
+ * parses them before calling onChange
+ */
 const NumericalInput: React.FC<NumericalInputProps> = props => (
     <TextInput
         onChangeText={(newValue => {

@@ -12,6 +12,9 @@ export interface LevelSelectorProps {
     }
 }
 
+/**
+ * Select a difficulty by setting minesweeper width, height and count of bombs.
+ */
 const LevelSelector: React.FC<LevelSelectorProps> = props => {
     const [width, setWidth] = useState(props.default.height);
     const [height, setHeight] = useState(props.default.height);
@@ -39,7 +42,9 @@ const LevelSelector: React.FC<LevelSelectorProps> = props => {
         <View>
             <LabelledInput
                 onValueChange={(newVal => {
-                    setBombs(newVal);
+                    if (newVal < height * width) {
+                        setBombs(newVal);
+                    }
                 })}
                 value={bombs}
                 label="bombs"

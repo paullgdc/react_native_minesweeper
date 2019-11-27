@@ -15,16 +15,16 @@ export interface MinesweeperGridProps {
 const MinesweeperGrid: React.FC<MinesweeperGridProps> = props => (
     <View style={{ flexDirection: "row", aspectRatio: props.width / props.height }}>
         {props.grid.map((colum, i) => (
-        <View key={i} style={{ flex: 1, flexDirection: "column", }}>
-            {colum.map((tile, j) => (
-            <Tile
-                key={j}
-                model={tile}
-                onPress={props.handlePress(i, j)}
-                onLongPress={props.handleLongPress(i, j)}
-            />
-            ))}
-        </View>
+            <View key={i} style={{ flex: 1, flexDirection: "column", }}>
+                {colum.map((tile, j) => (
+                    <Tile
+                        key={j}
+                        model={tile}
+                        onPress={props.handlePress(i, j)}
+                        onLongPress={props.handleLongPress(i, j)}
+                    />
+                ))}
+            </View>
         ))}
     </View>
 );

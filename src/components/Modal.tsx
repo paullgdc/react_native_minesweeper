@@ -25,6 +25,14 @@ const pulse = (value: Animated.Value, config: {
     ])
 }
 
+/**
+ * Displays a modal popup when visible is set to true
+ * This modal comes from the bottom of the screen to the
+ * middle in 1000ms with an easeOut, then scales to 1.4
+ * and then scales down to 1. in 500ms.
+ * 
+ * While the popup is raising, the screen also opacifies.
+ */
 const Modal: React.FC<ModalProps> = props => {
     const [bottom] = useState(new Animated.Value(- windowDims.height));
     const [zIndex, setZIndex] = useState(-1);
@@ -32,6 +40,9 @@ const Modal: React.FC<ModalProps> = props => {
 
     useEffect(() => {
         if (props.visible) {
+            // React useState hooks doesn't allow callbacks,
+            // So first we set the z-index of the modal wich
+            // triggers a second useEffect when the component is re-rendered
             setZIndex(100);
         } else {
             const animation = Animated.timing(bottom, {
@@ -45,7 +56,9 @@ const Modal: React.FC<ModalProps> = props => {
             return () => animation.stop();
         }
     }, [props.visible]);
+
     useEffect(() => {
+        // When z-index has been updated we can start the animation.
         if (zIndex === 100) {
             Animated.sequence([
                 Animated.timing(bottom, {

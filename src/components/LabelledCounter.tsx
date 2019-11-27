@@ -7,6 +7,10 @@ export interface LabelledCounterProps {
     value: string;
 }
 
+/**
+ * Display a value with an adjacent label.
+ * The style is inspired from semantic-ui input with labels
+ */
 const LabelledCounter: React.FC<LabelledCounterProps> = props => (
     <View style={styles.container}>
         <View style={styles.label}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, ScrollView, Dimensions, Button, StyleSheet, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import MineSweeperState, * as op from "./state";
 import Modal from '../../components/Modal';
 import MinesweeperGrid from '../../components/MinesweeperGrid';
@@ -8,7 +8,6 @@ import HorizontalDivider from '../../components/HorizontalDivider';
 import EndGamePopup from '../../components/EndGamePopup';
 import LevelSelector from '../../components/LevelSelector';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface MineSweeperProps {
   height: number,
@@ -17,40 +16,39 @@ interface MineSweeperProps {
 }
 
 const MineSweeper: React.FC<MineSweeperProps> = props => {
-  // const [width, setWidth] = useState(props.height);
-  // const [height, setHeight] = useState(props.height);
-  // const [bombs, setBombs] = useState(props.bombs);
   const [visible, setVisible] = useState(false);
 
-  const [state, setState] = useState<MineSweeperState>(
+  const [gameState, setGameState] = useState<MineSweeperState>(
     op.init(props.width, props.height, props.bombs)
   )
 
   const handlePress = (x: number, y: number) => () => {
-    setState(s => op.revealTile(s, { x, y }));
+    setGameState(s => op.revealTile(s, { x, y }));
   };
 
   const handleLongPress = (x: number, y: number) => () => {
-    setState(s => op.toogleFlagged(s, { x, y }));
+    setGameState(s => op.toogleFlagged(s, { x, y }));
   };
 
   useEffect(() => {
-    if (state.playState !== "playing") {
+    // If the state of the game to "lost" or "won",
+    // we show the modal
+    if (gameState.playState !== "playing") {
       setVisible(true);
     }
-  }, [state.playState])
+  }, [gameState.playState])
   return <>
     <Modal
       visible={visible}
       onClose={() => {
-        if (state.playState !== "playing") {
-          setState(op.init(state.width, state.height, state.bombNumber));
+        if (gameState.playState !== "playing") {
+          setGameState(op.init(gameState.width, gameState.height, gameState.bombNumber));
         }
       }}
     >
       <EndGamePopup
         text={(() => {
-          switch (state.playState) {
+          switch (gameState.playState) {
             case "won":
               return "You won!"
             case "lost":
@@ -64,19 +62,22 @@ const MineSweeper: React.FC<MineSweeperProps> = props => {
       />
     </Modal>
     <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-      <LabelledCounter label="Bombs" value={state.bombNumber.toString()} />
+      <LabelledCounter label="Bombs" value={gameState.bombNumber.toString()} />
       <HorizontalDivider />
-      <LabelledCounter label="Flags" value={state.flagNumber.toString()} />
+      <LabelledCounter label="Flags" value={gameState.flagNumber.toString()} />
     </View>
-    <ScrollView style={{ width: 0.8 * SCREEN_WIDTH }}>
+    <ScrollView style={{ width: "80%" }}>
       <MinesweeperGrid
-        grid={state.grid} height={state.height} width={state.width}
+        grid={gameState.grid} height={gameState.height} width={gameState.width}
         handlePress={handlePress} handleLongPress={handleLongPress}
       />
     </ScrollView>
-    <LevelSelector onSelect={(w, h, b) => {
-      setState(op.init(w, h, b))
-    }} default={{width: state.width, height: state.height, bombs: state.bombNumber}}/>
+    <LevelSelector
+      onSelect={(w, h, b) => {
+        setGameState(op.init(w, h, b))
+      }}
+      default={{ width: gameState.width, height: gameState.height, bombs: gameState.bombNumber }}
+    />
   </>
 };
 

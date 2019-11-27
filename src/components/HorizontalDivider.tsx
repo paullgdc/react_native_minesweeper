@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 
 const HorizontalDivider: React.FC = () => (
-    <View style={styles.divider}/>
+    <View style={styles.divider} />
 );
 
 const styles = StyleSheet.create({
