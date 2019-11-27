@@ -2,6 +2,10 @@
 
 A simple minesweeper app built with React native.
 
+Beginning                             | Playing                              | Lost
+:------------------------------------:|:-----------------------------------: | :------------------------------:
+![screen beginning](docs/screen.png)  |  ![screen playing](docs/screen2.png) | ![screen lost](docs/screen3.png)
+
 ## Run it
 
 ### Ios
