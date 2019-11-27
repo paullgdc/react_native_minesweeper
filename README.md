@@ -8,6 +8,7 @@ A simple minesweeper app built with React native.
 
 ```bash
 npm install
+cd ios && pod install && cd ..
 npx react-native run-ios
 ```
 
