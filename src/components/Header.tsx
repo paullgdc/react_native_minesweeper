@@ -1,13 +1,13 @@
 import React from 'react';
-import {View, StyleSheet, Text} from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 
 export interface HeaderProps {
     title: string;
 }
 
-const Header: React.FC<HeaderProps> = ({title}) => (
+const Header: React.FC<HeaderProps> = ({ title }) => (
     <View style={styles.header}>
-        <View style={{flex: 1, alignItems: "center"}}>
+        <View style={styles.innerView}>
             <Text style={styles.text}>{title}</Text>
         </View>
     </View>
@@ -21,6 +21,10 @@ const styles = StyleSheet.create({
         borderBottomColor: "black",
         textAlign: "center",
         flexDirection: "row",
+    },
+    innerView: {
+        flex: 1,
+        alignItems: "center"
     },
     text: {
         fontSize: 35,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Tile, { TileModel } from "./Tile";
 
 export type Grid = TileModel[][];
@@ -13,9 +13,12 @@ export interface MinesweeperGridProps {
 };
 
 const MinesweeperGrid: React.FC<MinesweeperGridProps> = props => (
-    <View style={{ flexDirection: "row", aspectRatio: props.width / props.height }}>
+    <View style={[
+        styles.row,
+        { aspectRatio: props.width / props.height }]
+    }>
         {props.grid.map((colum, i) => (
-            <View key={i} style={{ flex: 1, flexDirection: "column", }}>
+            <View key={i} style={styles.column}>
                 {colum.map((tile, j) => (
                     <Tile
                         key={j}
@@ -28,5 +31,15 @@ const MinesweeperGrid: React.FC<MinesweeperGridProps> = props => (
         ))}
     </View>
 );
+
+const styles = StyleSheet.create({
+    row: {
+        flexDirection: "row",
+    },
+    column: {
+        flex: 1,
+        flexDirection: "column",
+    }
+});
 
 export default MinesweeperGrid;
