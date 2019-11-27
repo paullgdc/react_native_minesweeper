@@ -37,7 +37,7 @@ npx react-native run-android
 │   │   ├── EndGamePopup.tsx
 │   │   ├── Header.tsx # Application header
 │   │   ├── HorizontalDivider.tsx
-│   │   ├── LabelledCounter.tsx # Bomb and flags counter
+│   │   ├── LabelledCounter.tsx # Bombs and flags counter
 │   │   ├── LabelledInput.tsx
 │   │   ├── LevelSelector.tsx # Size of the grid and bombcount selector
 │   │   ├── MinesweeperGrid.tsx # Minesweeper grid element
