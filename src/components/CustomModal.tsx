@@ -29,7 +29,6 @@ const CustomModal: React.FC<CustomModalProps> = props => {
     const [bottom] = useState(new Animated.Value(- windowDims.height));
     const [zIndex, setZIndex] = useState(-1);
     const [scale] = useState(new Animated.Value(1.0));
-    console.log({ bottom, props })
     useEffect(() => {
         if (props.visible) {
             setZIndex(100);

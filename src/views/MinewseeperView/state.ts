@@ -109,8 +109,7 @@ export const revealTile = (s: MineSweeperState, { x, y }: Pos): MineSweeperState
             )
         });
     }
-    const revealedTiles = openTileWhileNoBombNeighbor(s, tile);
-    console.log(revealedTiles);
+    const revealedTiles = propagateTileReveal(s, tile);
     const updates = {} as any;
     for(const tile of revealedTiles) {
         if(!updates[tile.pos.x]) updates[tile.pos.x] = {};
@@ -146,7 +145,7 @@ export const toogleFlagged = (s: MineSweeperState, { x, y }: Pos): MineSweeperSt
     return s
 }
 
-const openTileWhileNoBombNeighbor = (s: MineSweeperState, start: VoidTile & {
+const propagateTileReveal = (s: MineSweeperState, start: VoidTile & {
     visibility: Visibility;
     pos: Pos;
 }) => {
@@ -157,7 +156,6 @@ const openTileWhileNoBombNeighbor = (s: MineSweeperState, start: VoidTile & {
     while (nextTile) {
         for (const neighbor of tileNeighbors(s, nextTile.pos)) {
             if(neighbor.visibility === Visibility.Revealed || openedTileSet.has(neighbor)) continue;
-            console.log("adding", neighbor);
             openedTileSet.add(neighbor);
             if((neighbor as any).neighboringBombNb !== 0) continue;
             openedTileStack.push(neighbor as VoidTile & {
