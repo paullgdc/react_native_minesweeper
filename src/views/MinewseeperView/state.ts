@@ -98,9 +98,18 @@ export function* tileNeighbors(s: MineSweeperState, { x, y }: Pos) {
 }
 
 export const revealTile = (s: MineSweeperState, { x, y }: Pos): MineSweeperState => {
-    const tile = s.grid[x][y];
+    let tile = s.grid[x][y];
+    if (s.playState !== "playing" || tile.visibility === Visibility.Flagged) {
+        return s;
+    }
+
+    let newState = s;
+    if (s.bombs === undefined) {
+        newState = placeBombs(newState, { x, y });
+        tile = newState.grid[x][y];
+    }
     if (tile.kind === TileKind.Bomb) {
-        return update(s, {
+        return update(newState, {
             playState: { $set: "lost" },
             grid: (g: TileModel[][]) => g.map(
                 c => c.map(
@@ -109,40 +118,46 @@ export const revealTile = (s: MineSweeperState, { x, y }: Pos): MineSweeperState
             )
         });
     }
-    const revealedTiles = propagateTileReveal(s, tile);
+    const revealedTiles = propagateTileReveal(newState, tile);
     const updates = {} as any;
-    for(const tile of revealedTiles) {
-        if(!updates[tile.pos.x]) updates[tile.pos.x] = {};
+    for (const tile of revealedTiles) {
+        if (!updates[tile.pos.x]) updates[tile.pos.x] = {};
         updates[tile.pos.x][tile.pos.y] = { visibility: { $set: Visibility.Revealed } };
     }
-    let n = update(s, {
+    newState = update(newState, {
         tilesLeft: left => left - revealedTiles.size,
         grid: updates,
     });
-    if (n.tilesLeft === 0) {
-        n = update(n, {
+    if (newState.tilesLeft === 0) {
+        newState = update(newState, {
             playState: { $set: "won" },
         });
     }
-    return n;
+    return newState;
 }
 
 export const toogleFlagged = (s: MineSweeperState, { x, y }: Pos): MineSweeperState => {
-    const tile = s.grid[x][y];
-    if (tile.visibility !== Visibility.Revealed) {
-        const n = update(s, {
-            grid: {
-                [x]: {
-                    [y]: {
-                        visibility: (v) => (v === Visibility.Flagged ? Visibility.Hidden : Visibility.Flagged)
-                    }
-                }
-            },
-            flagNumber: (n) => tile.visibility === Visibility.Flagged ? n - 1 : n + 1,
-        });
-        return n
+    let tile = s.grid[x][y];
+    if (s.playState !== "playing" || tile.visibility === Visibility.Revealed) {
+        return s;
     }
-    return s
+
+    let newState = s;
+    if (s.bombs === undefined) {
+        newState = placeBombs(newState, { x, y });
+        tile = newState.grid[x][y];
+    }
+    newState = update(newState, {
+        grid: {
+            [x]: {
+                [y]: {
+                    visibility: (v) => (v === Visibility.Flagged ? Visibility.Hidden : Visibility.Flagged)
+                }
+            }
+        },
+        flagNumber: (n) => tile.visibility === Visibility.Flagged ? n - 1 : n + 1,
+    });
+    return newState
 }
 
 const propagateTileReveal = (s: MineSweeperState, start: VoidTile & {
@@ -150,14 +165,18 @@ const propagateTileReveal = (s: MineSweeperState, start: VoidTile & {
     pos: Pos;
 }) => {
     const openedTileStack = [];
-    const openedTileSet= new Set<TileModel>([start]);
-    if(start.neighboringBombNb === 0) openedTileStack.push(start);
+    const openedTileSet = new Set<TileModel>([start]);
+    if (start.neighboringBombNb === 0) {
+        openedTileStack.push(start);
+    }
     let nextTile = openedTileStack.pop();
     while (nextTile) {
         for (const neighbor of tileNeighbors(s, nextTile.pos)) {
-            if(neighbor.visibility === Visibility.Revealed || openedTileSet.has(neighbor)) continue;
+            if (neighbor.visibility !== Visibility.Hidden || openedTileSet.has(neighbor)) {
+                continue
+            };
             openedTileSet.add(neighbor);
-            if((neighbor as any).neighboringBombNb !== 0) continue;
+            if ((neighbor as any).neighboringBombNb !== 0) continue;
             openedTileStack.push(neighbor as VoidTile & {
                 visibility: Visibility;
                 pos: Pos;

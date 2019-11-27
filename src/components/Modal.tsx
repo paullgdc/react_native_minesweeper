@@ -3,7 +3,7 @@ import { StyleSheet, Animated, Dimensions, Easing } from "react-native";
 
 const windowDims = Dimensions.get("window");
 
-interface CustomModalProps {
+interface ModalProps {
     visible: boolean;
     onClose: () => void;
 }
@@ -25,21 +25,24 @@ const pulse = (value: Animated.Value, config: {
     ])
 }
 
-const CustomModal: React.FC<CustomModalProps> = props => {
+const Modal: React.FC<ModalProps> = props => {
     const [bottom] = useState(new Animated.Value(- windowDims.height));
     const [zIndex, setZIndex] = useState(-1);
     const [scale] = useState(new Animated.Value(1.0));
+
     useEffect(() => {
         if (props.visible) {
             setZIndex(100);
         } else {
-            Animated.timing(bottom, {
+            const animation = Animated.timing(bottom, {
                 toValue: - windowDims.height,
                 duration: 1000,
-            }).start(() => {
+            });
+            animation.start(() => {
                 setZIndex(-1);
                 props.onClose();
             });
+            return () => animation.stop();
         }
     }, [props.visible]);
     useEffect(() => {
@@ -88,4 +91,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default CustomModal;
+export default Modal;
